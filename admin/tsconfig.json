@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "types": ["cypress"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "types": [
+      "cypress"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -17,33 +23,62 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@h/*": ["app/*"],
-      "@c/*": ["components/*"],
-      "@chart/*": ["components/charts/*"],
-      "@ui/*": ["components/UI/*"],
-      "@em/*": ["components/email/*"],
-      "@data/*": ["components/data/*"],
-      "@proj/*": ["components/projects/*"],
-      "@msg/*": ["components/messages/*"],
-      "@usr/*": ["components/users/*"],
-      "@cs/*": ["styles/pages/*"],
-      "@s/*": ["styles/*"],
-      "@css/*": ["styles/components/*"],
-      "lib/*": ["lib/*"]
+      "@h/*": [
+        "app/*"
+      ],
+      "@c/*": [
+        "components/*"
+      ],
+      "@chart/*": [
+        "components/charts/*"
+      ],
+      "@ui/*": [
+        "components/UI/*"
+      ],
+      "@em/*": [
+        "components/email/*"
+      ],
+      "@data/*": [
+        "components/data/*"
+      ],
+      "@proj/*": [
+        "components/projects/*"
+      ],
+      "@msg/*": [
+        "components/messages/*"
+      ],
+      "@usr/*": [
+        "components/users/*"
+      ],
+      "@cs/*": [
+        "styles/pages/*"
+      ],
+      "@s/*": [
+        "styles/*"
+      ],
+      "@css/*": [
+        "styles/components/*"
+      ],
+      "lib/*": [
+        "lib/*"
+      ]
     },
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules"
+  ],
   "prettier": {
     "trailingComma": "es5",
     "singleQuote": true,
