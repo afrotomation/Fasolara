@@ -1,14 +1,12 @@
 import bcrypt from "bcryptjs";
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 import jwt from "jsonwebtoken";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import User from "../../models/user.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type User {
@@ -114,7 +112,7 @@ const resolvers = {
             try {
                 const user = await User.findOne({ email });
                 if (!user) {
-                    return ApolloError("User not found", "USER_NOT_FOUND");
+                    ApolloError("User not found", "USER_NOT_FOUND");
                 }
                 return user;
             } catch (error) {
@@ -124,7 +122,7 @@ const resolvers = {
         }),
         getUser: async (_, { id }) => {
             if (!isValid(id)) {
-                return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+                ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
             }
             return await User.findById(id);
         },
@@ -139,7 +137,7 @@ const resolvers = {
                 // See if an old user exists with same email
                 const oldUser = await User.findOne({ email });
                 if (oldUser) {
-                    return ApolloError(
+                    ApolloError(
                         "A user already exists with email" + email,
                         "USER_ALREADY_EXISTS"
                     );
@@ -180,7 +178,7 @@ const resolvers = {
                 // See if this user exists
                 const user = await User.findOne({ email });
                 if (!user) {
-                    return ApolloError("User not found", "USER_NOT_FOUND");
+                    ApolloError("User not found", "USER_NOT_FOUND");
                 }
                 // check correct password
                 if (user && (await bcrypt.compare(password, user.password))) {
@@ -200,7 +198,7 @@ const resolvers = {
                     };
                 } else {
                     // Return incorrect password
-                    return ApolloError(
+                    ApolloError(
                         "Email or password is incorrect",
                         "INCORRECT_PASSWORD"
                     );
@@ -215,12 +213,12 @@ const resolvers = {
                 // See if this user exists
                 const user = await User.findById(updateUserInput.id);
                 if (!user) {
-                    return ApolloError("User not found", "USER_NOT_FOUND");
+                    ApolloError("User not found", "USER_NOT_FOUND");
                 }
                 // Update old account
                 const res = await User.findOneAndUpdate(
                     { _id: updateUserInput.id },
-                    { updateUserInput },
+                    updateUserInput,
                     { new: true }
                 );
                 return {
@@ -229,7 +227,7 @@ const resolvers = {
                 };
             } catch (error) {
                 console.log(error);
-                return ApolloError(error.message, error.code);
+                ApolloError(error.message, error.code);
             }
         },
     },

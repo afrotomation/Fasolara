@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Bank from "../../models/bank.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type Bank {
@@ -58,7 +57,7 @@ const resolvers = {
       try {
         const account = await Bank.findOne({ customerId: user.id });
         if (!account) {
-          return ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
+          ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
         }
         return account;
       } catch (error) {
@@ -68,7 +67,7 @@ const resolvers = {
     }),
     getBank: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Bank.findById(id);
     },
@@ -83,7 +82,7 @@ const resolvers = {
           branch: createBankInput.branch,
         });
         if (oldBankByBranch) {
-          return ApolloError(
+          ApolloError(
             `An bank already with name ${createBankInput.name} and branch ${createBankInput.branch}`,
             "BANK_ALREADY_EXISTS"
           );
@@ -110,7 +109,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldBank = await Bank.findById(updateBankInput.id);
           if (!oldBank) {
-            return ApolloError(
+            ApolloError(
               "No bank was found with ID " + updateBankInput.id,
               "ACCOUNT_NOT_FOUND"
             );
@@ -118,7 +117,7 @@ const resolvers = {
           // Update old account
           const res = await Bank.findOneAndUpdate(
             { _id: updateBankInput.id },
-            { updateBankInput },
+            updateBankInput,
             { new: true }
           );
           return {

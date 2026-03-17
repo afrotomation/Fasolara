@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Investor from "../../models/investor.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -77,7 +76,7 @@ const resolvers = {
         try {
           const investor = await Investor.findOne({ userId: user.id });
           if (!investor) {
-            return ApolloError("Investor not found", "INVESTOR_NOT_FOUND");
+            ApolloError("Investor not found", "INVESTOR_NOT_FOUND");
           }
           return investor;
         } catch (error) {
@@ -88,7 +87,7 @@ const resolvers = {
     ),
     getInvestor: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Investor.findById(id);
     },
@@ -103,7 +102,7 @@ const resolvers = {
           branch: createInvestorInput.branch,
         });
         if (oldInvestorByBranch) {
-          return ApolloError(
+          ApolloError(
             `An Investor already with name ${createInvestorInput.name} and branch ${createInvestorInput.branch}`,
             "Investor_ALREADY_EXISTS"
           );
@@ -130,7 +129,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldInvestor = await Investor.findById(updateInvestorInput.id);
           if (!oldInvestor) {
-            return ApolloError(
+            ApolloError(
               "No Investor was found with ID " + updateInvestorInput.id,
               "ACCOUNT_NOT_FOUND"
             );
@@ -138,7 +137,7 @@ const resolvers = {
           // Update old account
           const res = await Investor.findOneAndUpdate(
             { _id: updateInvestorInput.id },
-            { updateInvestorInput },
+            updateInvestorInput,
             { new: true }
           );
           return {

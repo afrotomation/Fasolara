@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers"
-import { PubSub, withFilter } from "graphql-subscriptions"
+import { withFilter } from "graphql-subscriptions"
 import { gql } from "graphql-tag"
 
 import { ApolloError, isValid } from '../../helpers/grahql.js'
 import Country from "../../models/country.js"
 import { isAuthenticated } from "../middleware/index.js"
-
-const pubsub = new PubSub()
+import pubsub from "../pubsub.js"
 
 const typeDefs = gql`
   """
@@ -70,7 +69,7 @@ const resolvers = {
 				const country = await Country.findOne({nationality: user.nationality });
 				if ( !country )
 				{
-					return ApolloError( "Country not found", "COUNTRY_NOT_FOUND" )
+					ApolloError( "Country not found", "COUNTRY_NOT_FOUND" )
 				}
 				return country
 			}
@@ -84,7 +83,7 @@ const resolvers = {
 		{
 			if ( !isValid( id ) )
 			{
-				return ApolloError( "Provided ID is not valid", "INVALID_OBJECT_ID" )
+				ApolloError( "Provided ID is not valid", "INVALID_OBJECT_ID" )
 			}
 			return await Country.findById( id )
 		},
@@ -101,7 +100,7 @@ const resolvers = {
 				} )
 				if ( oldCountryByName )
 				{
-					return ApolloError( `An Country already with name ${createCountryInput.name}`, "Country_ALREADY_EXISTS" )
+					ApolloError( `An Country already with name ${createCountryInput.name}`, "Country_ALREADY_EXISTS" )
 				}
 				// Build mongoose model
 				const newCountry = new Country( {
@@ -120,7 +119,7 @@ const resolvers = {
 				throw error
 			}
 		},
-		updateBank: combineResolvers( isAuthenticated, async ( _, { updateCountryInput } ) =>
+		updateCountry: combineResolvers( isAuthenticated, async ( _, { updateCountryInput } ) =>
 		{
 			try
 			{
@@ -128,10 +127,10 @@ const resolvers = {
 				const oldCountry = await Country.findById( updateCountryInput.id )
 				if ( !oldCountry )
 				{
-					return ApolloError( "No country was found with ID " + updateCountryInput.id, "COUNTRY_NOT_FOUND" )
+					ApolloError( "No country was found with ID " + updateCountryInput.id, "COUNTRY_NOT_FOUND" )
 				}
 				// Update old account
-				const res = await Country.findOneAndUpdate( { _id: updateCountryInput.id }, { updateCountryInput }, { new: true } )
+				const res = await Country.findOneAndUpdate( { _id: updateCountryInput.id }, updateCountryInput, { new: true } )
 				return {
 					id: res.id,
 					...res._doc,
@@ -151,7 +150,7 @@ const resolvers = {
 				() => pubsub.asyncIterator( "countryCreated" ),
 				( payload, variables ) =>
 				{
-					return payload.bankCreated.location === variables.location
+					return payload.countryCreated.location === variables.location
 				}
 			),
 		},

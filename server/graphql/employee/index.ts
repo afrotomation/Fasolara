@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Employee from "../../models/employee.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -94,7 +93,7 @@ const resolvers = {
         try {
           const employee = await Employee.findOne({ userId: user.id });
           if (!employee) {
-            return ApolloError("Employee not found", "EMPLOYEE_NOT_FOUND");
+            ApolloError("Employee not found", "EMPLOYEE_NOT_FOUND");
           }
           return employee;
         } catch (error) {
@@ -105,7 +104,7 @@ const resolvers = {
     ),
     getEmployee: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Employee.findById(id);
     },
@@ -120,7 +119,7 @@ const resolvers = {
           branch: createEmployeeInput.branch,
         });
         if (oldEmployeeByBranch) {
-          return ApolloError(
+          ApolloError(
             `An Employee already with name ${createEmployeeInput.name} and branch ${createEmployeeInput.branch}`,
             "EMPLOYEE_ALREADY_EXISTS"
           );
@@ -147,7 +146,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldEmployee = await Employee.findById(updateEmployeeInput.id);
           if (!oldEmployee) {
-            return ApolloError(
+            ApolloError(
               "No Employee was found with ID " + updateEmployeeInput.id,
               "EMPLOYEE_NOT_FOUND"
             );
@@ -155,7 +154,7 @@ const resolvers = {
           // Update old account
           const res = await Employee.findOneAndUpdate(
             { _id: updateEmployeeInput.id },
-            { updateEmployeeInput },
+            updateEmployeeInput,
             { new: true }
           );
           return {

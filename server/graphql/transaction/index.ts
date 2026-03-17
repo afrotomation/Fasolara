@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers"
-import { PubSub, withFilter } from "graphql-subscriptions"
+import { withFilter } from "graphql-subscriptions"
 import { gql } from "graphql-tag"
 
 import { ApolloError, isValid } from "../../helpers/grahql.js"
 import Transaction from "../../models/transaction.js"
 import { isAuthenticated } from "../middleware/index.js"
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js"
 
 const typeDefs = gql`
   """
@@ -100,7 +99,7 @@ const resolvers = {
     ),
     getTransaction: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Transaction.findById(id);
     },
@@ -117,7 +116,7 @@ const resolvers = {
         });
 
         if (oldTransaction) {
-          return ApolloError(
+          ApolloError(
             `A Transaction already exists with ID ${oldTransaction.id}`,
             "TRANSACTION_ALREADY_EXISTS"
           );
@@ -149,7 +148,7 @@ const resolvers = {
           );
 
           if (!oldTransaction) {
-            return ApolloError(
+            ApolloError(
               "No Transaction was found with ID " + updateTransactionInput.id,
               "TRANSACTION_NOT_FOUND"
             );
@@ -158,7 +157,7 @@ const resolvers = {
           // Update old account
           const res = await Transaction.findOneAndUpdate(
             { _id: updateTransactionInput.id },
-            { updateTransactionInput },
+            updateTransactionInput,
             { new: true }
           );
 

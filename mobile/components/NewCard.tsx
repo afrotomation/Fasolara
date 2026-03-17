@@ -16,35 +16,35 @@ const NewCard = () =>
 			<Box>
 				<AspectRatio w="100%" ratio={16 / 9}>
 					<Image source={{
-						uri: "https://www.holidify.com/images/cmsuploads/compressed/Bangalore_citycover_20190613234056.jpg"
-					}} alt="image" />
+						uri: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800"
+					}} alt="Solar panels in Burkina Faso" />
 				</AspectRatio>
-				<Center bg="violet.500" _dark={{
-					bg: "violet.400"
+				<Center bg="orange.500" _dark={{
+					bg: "orange.400"
 				}} _text={{
 					color: "warmGray.50",
 					fontWeight: "700",
 					fontSize: "xs"
 				}} position="absolute" bottom="0" px="3" py="1.5">
-					PHOTOS
+					SOLAR
 				</Center>
 			</Box>
 			<Stack p="4" space={3}>
 				<Stack space={2}>
 					<Heading size="md" ml="-1">
-						The Garden City
+						FasoLara Solar Energy
 					</Heading>
 					<Text fontSize="xs" _light={{
-						color: "violet.500"
+						color: "orange.500"
 					}} _dark={{
-						color: "violet.400"
+						color: "orange.400"
 					}} fontWeight="500" ml="-0.5" mt="-1">
-						The Silicon Valley of India.
+						Powering Burkina Faso with clean energy.
 					</Text>
 				</Stack>
 				<Text fontWeight="400">
-					Bengaluru (also called Bangalore) is the center of India's high-tech
-					industry. The city is also known for its parks and nightlife.
+					FasoLara brings affordable solar energy solutions to communities
+					across Burkina Faso, improving lives through sustainable power.
 				</Text>
 				<HStack alignItems="center" space={4} justifyContent="space-between">
 					<HStack alignItems="center">

@@ -19,7 +19,7 @@ const Visitor = (props: { visible: boolean } ) =>
     fetchData()
   }, [] )
 
-  if ( !count ) return
+  if ( !count ) return null
 
   return (
     <div className={styles.Visitor}>{props.visible && `Visitors: ${count}`}</div>

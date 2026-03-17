@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers"
-import { PubSub, withFilter } from "graphql-subscriptions"
+import { withFilter } from "graphql-subscriptions"
 import { gql } from "graphql-tag"
 
 import { ApolloError, isValid } from '../../helpers/grahql.js'
 import Comment from "../../models/comment.js"
 import { isAuthenticated } from "../middleware/index.js"
-
-const pubsub = new PubSub()
+import pubsub from "../pubsub.js"
 
 const typeDefs = gql`
   type Comment {
@@ -73,7 +72,7 @@ const resolvers = {
                 const comment = await Comment.findOne({ userId: user.id });
                 if ( !comment )
                 {
-                    return ApolloError( "comment not found", "COMMENT_NOT_FOUND" )
+                    ApolloError( "comment not found", "COMMENT_NOT_FOUND" )
                 }
                 return comment
             }
@@ -87,7 +86,7 @@ const resolvers = {
         {
             if ( !isValid( id ) )
             {
-                return ApolloError( "Provided ID is not valid", "INVALID_OBJECT_ID" )
+                ApolloError( "Provided ID is not valid", "INVALID_OBJECT_ID" )
             }
             return await Comment.findById( id )
         },
@@ -105,7 +104,7 @@ const resolvers = {
                 } )
                 if ( oldCommentByUser )
                 {
-                    return ApolloError( `A comment already exists with user ${createCommentInput.userId} and content ${createCommentInput.content}`, "COMMENT_ALREADY_EXISTS" )
+                    ApolloError( `A comment already exists with user ${createCommentInput.userId} and content ${createCommentInput.content}`, "COMMENT_ALREADY_EXISTS" )
                 }
                 // Build mongoose model
                 const newComment = new Comment( {
@@ -132,10 +131,10 @@ const resolvers = {
                 const oldComment = await Comment.findById( updateCommentInput.id )
                 if ( !oldComment )
                 {
-                    return ApolloError( "No comment was found with ID " + updateCommentInput.id, "COMMENT_NOT_FOUND" )
+                    ApolloError( "No comment was found with ID " + updateCommentInput.id, "COMMENT_NOT_FOUND" )
                 }
                 // Update old account
-                const res = await Comment.findOneAndUpdate( { _id: updateCommentInput.id }, { updateCommentInput }, { new: true } )
+                const res = await Comment.findOneAndUpdate( { _id: updateCommentInput.id }, updateCommentInput, { new: true } )
                 return {
                     id: res.id,
                     ...res._doc,

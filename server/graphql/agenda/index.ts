@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Agenda from "../../models/agenda.js";
 import { isAdmin, isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type Agenda {
@@ -72,7 +71,7 @@ const resolvers = {
       try {
         const agendas = await Agenda.find({ createdBy: user.id });
         if (!agendas.length) {
-          return ApolloError("Agenda not found", "AGENDA_NOT_FOUND");
+          ApolloError("Agenda not found", "AGENDA_NOT_FOUND");
         }
         return agendas;
       } catch (error) {
@@ -82,7 +81,7 @@ const resolvers = {
     }),
     getAgenda: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Agenda.findById(id);
     },
@@ -99,7 +98,7 @@ const resolvers = {
             endTime: createAgendaInput.endTime,
           });
           if (oldAgendaByTime) {
-            return ApolloError(
+            ApolloError(
               `An Agenda already exists with starting ${createAgendaInput.startTime} and ending ${createAgendaInput.endTime}`,
               "AGENDA_ALREADY_EXISTS"
             );
@@ -127,7 +126,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldAgenda = await Agenda.findById(updateAgendaInput.id);
           if (!oldAgenda) {
-            return ApolloError(
+            ApolloError(
               "No Agenda was found with ID " + updateAgendaInput.id,
               "AGENDA_NOT_FOUND"
             );
@@ -135,7 +134,7 @@ const resolvers = {
           // Update old account
           const res = await Agenda.findOneAndUpdate(
             { _id: updateAgendaInput.id },
-            { updateAgendaInput },
+            updateAgendaInput,
             { new: true }
           );
           return {

@@ -1,12 +1,10 @@
 import { combineResolvers } from "graphql-resolvers"
-import { PubSub } from 'graphql-subscriptions'
 import { gql } from 'graphql-tag'
 
 import { ApolloError } from '../../helpers/grahql.js'
 import Village from '../../models/village.js'
 import { isAuthenticated } from "../middleware/index.js"
-
-const pubsub = new PubSub()
+import pubsub from "../pubsub.js"
 
 const typeDefs = gql`
   """
@@ -73,7 +71,7 @@ const resolvers = {
 				const village = await Village.findById( villageId )
 				if ( !village )
 				{
-					return ApolloError( "Village not found", "ACCOUNT_NOT_FOUND" )
+					ApolloError( "Village not found", "ACCOUNT_NOT_FOUND" )
 				}
 				return village
 			} catch ( error )
@@ -95,7 +93,7 @@ const resolvers = {
 
 				if ( oldVillageByName )
 				{
-					return ApolloError(
+					ApolloError(
 						"An village already exists with name " +
 						createVillageInput.name,
 						"VILLAGE_ALREADY_EXISTS"
@@ -131,7 +129,7 @@ const resolvers = {
 
 					if ( !oldVillage )
 					{
-						return ApolloError(
+						ApolloError(
 							"No village was found with ID " + updateVillageInput.id,
 							"VILLAGE_NOT_FOUND"
 						)
@@ -140,7 +138,7 @@ const resolvers = {
 					// Update old account
 					const res = await Village.findOneAndUpdate(
 						{ _id: updateVillageInput.id },
-						{ updateVillageInput },
+						updateVillageInput,
 						{ new: true }
 					)
 

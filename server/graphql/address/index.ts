@@ -1,13 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 import { ApolloError } from "../../helpers/grahql.js";
 
 import Address from "../../models/address.js";
 import Village from "../../models/village.js";
 import { isAdmin, isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type Address {
@@ -76,7 +74,7 @@ const resolvers = {
       try {
         const address = await Address.findOne({ customerId: user.id });
         if (!address) {
-          return ApolloError("Address not found", "ADDRESS_NOT_FOUND");
+          ApolloError("Address not found", "ADDRESS_NOT_FOUND");
         }
         return address;
       } catch (error) {
@@ -95,7 +93,7 @@ const resolvers = {
             address: createAddressInput.address,
           });
           if (oldAddress) {
-            return ApolloError(
+            ApolloError(
               "An address already exists with address" +
                 createAddressInput.address,
               "ADDRESS_ALREADY_EXISTS"
@@ -124,7 +122,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldAddress = await Address.findById(updateAddressInput.id);
           if (!oldAddress) {
-            return ApolloError(
+            ApolloError(
               "No account was found with ID  " + updateAddressInput.id,
               "ADDRESS_NOT_FOUND"
             );
@@ -150,7 +148,7 @@ const resolvers = {
             newAddress.updatedAt = updateAddressInput.updatedAt;
           const res = await Address.findOneAndUpdate(
             { _id: updateAddressInput.id },
-            { newAddress },
+            newAddress,
             { new: true }
           );
           return {

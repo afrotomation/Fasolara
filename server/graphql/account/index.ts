@@ -1,5 +1,4 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 import { ApolloError } from "../../helpers/grahql.js";
 
@@ -7,8 +6,7 @@ import Account from "../../models/account.js";
 import Bank from "../../models/bank.js";
 import User from "../../models/user.js";
 import { isAdmin, isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type Account {
@@ -79,7 +77,7 @@ const resolvers = {
       try {
         const account = await Account.findOne({ customerId: user.id });
         if (!account) {
-          return ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
+          ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
         }
         return account;
       } catch (error) {
@@ -103,13 +101,13 @@ const resolvers = {
           });
 
           if (oldAccountByUser) {
-            return ApolloError(
+            ApolloError(
               "An account already exists for user  " +
                 createAccountInput.customerId,
               "ACCOUNT_ALREADY_EXISTS"
             );
           } else if (oldAccountByAccount) {
-            return ApolloError(
+            ApolloError(
               "An account already exists for accountNumber  " +
                 createAccountInput.accountNumber,
               "ACCOUNT_ALREADY_EXISTS"
@@ -142,7 +140,7 @@ const resolvers = {
           const oldAccount = await Account.findById(updateAccountInput.id);
 
           if (!oldAccount) {
-            return ApolloError(
+            ApolloError(
               "No account was found with ID " + updateAccountInput.id,
               "ACCOUNT_NOT_FOUND"
             );
@@ -151,7 +149,7 @@ const resolvers = {
           // Update old account
           const res = await Account.findOneAndUpdate(
             { id: updateAccountInput.id },
-            { updateAccountInput },
+            updateAccountInput,
             { new: true }
           );
 

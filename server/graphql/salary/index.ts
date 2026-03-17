@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Salary from "../../models/salary.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -67,7 +66,7 @@ const resolvers = {
       try {
         const salary = await Salary.findOne({ userId: user.id });
         if (!salary) {
-          return ApolloError("Salary not found", "SALARY_NOT_FOUND");
+          ApolloError("Salary not found", "SALARY_NOT_FOUND");
         }
         return salary;
       } catch (error) {
@@ -78,7 +77,7 @@ const resolvers = {
     /* fieldName:(root, args, context, info) => { result } */
     getSalary: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Salary.findById(id);
     },
@@ -93,7 +92,7 @@ const resolvers = {
         });
 
         if (oldSalary) {
-          return ApolloError(
+          ApolloError(
             `A Salary already exists with ID ${createSalaryInput.userId}`,
             "Salary_ALREADY_EXISTS"
           );
@@ -123,7 +122,7 @@ const resolvers = {
           const oldSalary = await Salary.findById(updateSalaryInput.id);
 
           if (!oldSalary) {
-            return ApolloError(
+            ApolloError(
               "No Salary was found with ID " + updateSalaryInput.id,
               "Salary_NOT_FOUND"
             );
@@ -132,7 +131,7 @@ const resolvers = {
           // Update old account
           const res = await Salary.findOneAndUpdate(
             { _id: updateSalaryInput.id },
-            { updateSalaryInput },
+            updateSalaryInput,
             { new: true }
           );
 
@@ -148,19 +147,19 @@ const resolvers = {
     ),
   },
   Subscription: {
-    bankCreated: {
+    salaryCreated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator("bankCreated"),
+        () => pubsub.asyncIterator("salaryCreated"),
         (payload, variables) => {
-          return payload.bankCreated.location === variables.location;
+          return payload.salaryCreated.userId === variables.userId;
         }
       ),
     },
-    bankUpdated: {
-      subscribe: () => pubsub.asyncIterator("bankUpdated"),
+    salaryUpdated: {
+      subscribe: () => pubsub.asyncIterator("salaryUpdated"),
     },
-    bankDeleted: {
-      subscribe: () => pubsub.asyncIterator("bankDeleted"),
+    salaryDeleted: {
+      subscribe: () => pubsub.asyncIterator("salaryDeleted"),
     },
   },
 };

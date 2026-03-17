@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Supplier from "../../models/supplier.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -63,7 +62,7 @@ const resolvers = {
     /* fieldName:(root, args, context, info) => { result } */
     supplier: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Supplier.findById(id);
     },
@@ -78,7 +77,7 @@ const resolvers = {
         });
 
         if (oldSupplier) {
-          return ApolloError(
+          ApolloError(
             `A Supplier already exists with ID ${createSupplierInput.accountId}`,
             "SUPPLIER_ALREADY_EXISTS"
           );
@@ -108,7 +107,7 @@ const resolvers = {
           const oldSupplier = await Supplier.findById(updateSupplierInput.id);
 
           if (!oldSupplier) {
-            return ApolloError(
+            ApolloError(
               "No Supplier was found with ID " + updateSupplierInput.id,
               "SUPPLIER_NOT_FOUND"
             );
@@ -117,7 +116,7 @@ const resolvers = {
           // Update old account
           const res = await Supplier.findOneAndUpdate(
             { _id: updateSupplierInput.id },
-            { updateSupplierInput },
+            updateSupplierInput,
             { new: true }
           );
 

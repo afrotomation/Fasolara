@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Province from "../../models/province.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -83,7 +82,7 @@ const resolvers = {
     // ),
     getProvince: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Province.findById(id);
     },
@@ -97,7 +96,7 @@ const resolvers = {
           name: createProvinceInput.name,
         });
         if (oldProvinceByName) {
-          return ApolloError(
+          ApolloError(
             `An Province already with name ${createProvinceInput.name}`,
             "Province_ALREADY_EXISTS"
           );
@@ -124,7 +123,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldProvince = await Province.findById(updateProvinceInput.id);
           if (!oldProvince) {
-            return ApolloError(
+            ApolloError(
               "No Province was found with ID " + updateProvinceInput.id,
               "PROVINCE_NOT_FOUND"
             );
@@ -132,7 +131,7 @@ const resolvers = {
           // Update old account
           const res = await Province.findOneAndUpdate(
             { _id: updateProvinceInput.id },
-            { updateProvinceInput },
+            updateProvinceInput,
             { new: true }
           );
           return {

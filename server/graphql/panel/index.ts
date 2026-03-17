@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Panel from "../../models/panel.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -115,7 +114,7 @@ const resolvers = {
     ),
     getPanel: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_ID");
+        ApolloError("Provided ID is not valid", "INVALID_ID");
       }
       return await Panel.findById(id);
     },
@@ -129,7 +128,7 @@ const resolvers = {
           serialNumber: createPanelInput.serialNumber,
         });
         if (oldPanel) {
-          return ApolloError(
+          ApolloError(
             `A Panel already exists with serial ${createPanelInput.serialNumber}`,
             "PANEL_EXISTS"
           );
@@ -156,7 +155,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldPanel = await Panel.findById(updatePanelInput.id);
           if (!oldPanel) {
-            return ApolloError(
+            ApolloError(
               "No Panel was found with ID " + updatePanelInput.id,
               "PANEL_NOT_FOUND"
             );
@@ -164,7 +163,7 @@ const resolvers = {
           // Update old account
           const res = await Panel.findOneAndUpdate(
             { id: updatePanelInput.id },
-            { updatePanelInput },
+            updatePanelInput,
             { new: true }
           );
           return {
@@ -181,9 +180,9 @@ const resolvers = {
   Subscription: {
     panelCreated: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator("bankCreated"),
+        () => pubsub.asyncIterator("panelCreated"),
         (payload, variables) => {
-          return payload.bankCreated.location === variables.location;
+          return payload.panelCreated.location === variables.location;
         }
       ),
     },

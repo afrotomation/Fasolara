@@ -1,3 +1,5 @@
+export {}
+
 describe( 'empty spec', () =>
 {
   beforeEach( () =>

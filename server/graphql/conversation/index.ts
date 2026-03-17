@@ -1,15 +1,14 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 import { Types } from "mongoose";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Conversation from "../../models/conversation.js";
 import { isAuthenticated } from "../middleware/index.js";
+import pubsub from "../pubsub.js";
 
 const { ObjectId } = Types;
-
-const pubsub = new PubSub();
 
 const typeDefs = gql`
   type Message {
@@ -167,7 +166,7 @@ const resolvers = {
             updateConvoInput.id
           );
           if (!oldConversation) {
-            return ApolloError(
+            ApolloError(
               "No Conversation was found with ID " + updateConvoInput.id,
               "Conversation_NOT_FOUND"
             );
@@ -175,7 +174,7 @@ const resolvers = {
           // Update old account
           const res = await Conversation.findOneAndUpdate(
             { _id: updateConvoInput.id },
-            { updateConvoInput },
+            updateConvoInput,
             { new: true }
           );
           return {
@@ -195,7 +194,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldConversation = await Conversation.findById(addMsgInput.id);
           if (!oldConversation) {
-            return ApolloError(
+            ApolloError(
               "No Conversation was found with ID " + addMsgInput.id,
               "Conversation_NOT_FOUND"
             );
@@ -227,7 +226,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldConversation = await Conversation.findById(addPptInput.id);
           if (!oldConversation) {
-            return ApolloError(
+            ApolloError(
               "No Conversation was found with ID " + addPptInput.id,
               "Conversation_NOT_FOUND"
             );
@@ -268,7 +267,7 @@ const resolvers = {
             model: "User",
           });
           if (!conversation) {
-            return ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
+            ApolloError("Account not found", "ACCOUNT_NOT_FOUND");
           }
           return conversation;
         } catch (error) {
@@ -279,7 +278,7 @@ const resolvers = {
     ),
     getConversation: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Conversation.findById(id).populate({
         path: "participants.userId",
@@ -295,7 +294,7 @@ const resolvers = {
   Subscription: {
     conversationChanged: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator("bankCreated"),
+        () => pubsub.asyncIterator("conversationChanged"),
         (payload, variables) => {
           return payload.conversationChanged.id === variables.conversationId;
         }

@@ -29,8 +29,8 @@ const LoginPage = () =>
 			<Box bg={"#272727"} p={6} rounded="md" w={64}>
 				<Formik
 					initialValues={{
-						email: "christ@fasolara.com",
-						password: "Testing2023",
+						email: "",
+						password: "",
 						rememberMe: false
 					}}
 					onSubmit={( values ) =>

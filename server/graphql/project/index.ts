@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Project from "../../models/project.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   """
@@ -123,7 +122,7 @@ const resolvers = {
         });
 
         if (oldProject) {
-          return ApolloError(
+          ApolloError(
             `A Project already exists with ID ${createProjectInput.userId}`,
             "PROJECT_ALREADY_EXISTS"
           );
@@ -153,7 +152,7 @@ const resolvers = {
           const oldProject = await Project.findById(updateProjectInput.id);
 
           if (!oldProject) {
-            return ApolloError(
+            ApolloError(
               "No Project was found with ID " + updateProjectInput.id,
               "PROJECT_NOT_FOUND"
             );
@@ -162,7 +161,7 @@ const resolvers = {
           // Update old account
           const res = await Project.findOneAndUpdate(
             { _id: updateProjectInput.id },
-            { updateProjectInput },
+            updateProjectInput,
             { new: true }
           );
 
@@ -184,7 +183,7 @@ const resolvers = {
           const oldProject = await Project.findById(addSupplierInput.id);
 
           if (!oldProject) {
-            return ApolloError(
+            ApolloError(
               "No Project was found with ID " + addSupplierInput.id,
               "PROJECT_NOT_FOUND"
             );
@@ -215,7 +214,7 @@ const resolvers = {
           const oldProject = await Project.findById(addSupplierInput.id);
 
           if (!oldProject) {
-            return ApolloError(
+            ApolloError(
               "No Project was found with ID " + addSupplierInput.id,
               "PROJECT_NOT_FOUND"
             );
@@ -252,7 +251,7 @@ const resolvers = {
           const oldProject = await Project.findById(addTeamInput.id);
 
           if (!oldProject) {
-            return ApolloError(
+            ApolloError(
               "No Project was found with ID " + addTeamInput.id,
               "PROJECT_NOT_FOUND"
             );
@@ -287,7 +286,7 @@ const resolvers = {
           const oldProject = await Project.findById(addTeamInput.id);
 
           if (!oldProject) {
-            return ApolloError(
+            ApolloError(
               "No Project was found with ID " + addTeamInput.id,
               "PROJECT_NOT_FOUND"
             );
@@ -330,7 +329,7 @@ const resolvers = {
     /* fieldName:(root, args, context, info) => { result } */
     getProject: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Project.findById(id);
     },

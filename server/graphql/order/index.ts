@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers"
-import { PubSub, withFilter } from "graphql-subscriptions"
+import { withFilter } from "graphql-subscriptions"
 import { gql } from "graphql-tag"
 
 import { ApolloError, isValid } from '../../helpers/grahql.js'
 import Order from "../../models/order.js"
 import { isAuthenticated } from "../middleware/index.js"
-
-const pubsub = new PubSub()
+import pubsub from "../pubsub.js"
 
 const typeDefs = gql`
   """
@@ -105,7 +104,7 @@ const resolvers = {
 		{
 			if ( !isValid( id ) )
 			{
-				return ApolloError( "Provided ID is not valid", "INVALID_ID" )
+				ApolloError( "Provided ID is not valid", "INVALID_ID" )
 			}
 			return await Order.findById( id )
 		},
@@ -123,7 +122,7 @@ const resolvers = {
 				} )
 				if ( oldOrder )
 				{
-					return ApolloError( `An order already exists with user ${createOrderInput.userId} and timestamp ${createOrderInput.orderDate}`, "ORDER_EXISTS" )
+					ApolloError( `An order already exists with user ${createOrderInput.userId} and timestamp ${createOrderInput.orderDate}`, "ORDER_EXISTS" )
 				}
 				// Build mongoose model
 				const newOrder = new Order( {
@@ -150,10 +149,10 @@ const resolvers = {
 				const oldOrder = await Order.findById( updateOrderInput.id )
 				if ( !oldOrder )
 				{
-					return ApolloError( "No Order was found with ID " + updateOrderInput.id, "INVALID_ID" )
+					ApolloError( "No Order was found with ID " + updateOrderInput.id, "INVALID_ID" )
 				}
 				// Update old account
-				const res = await Order.findOneAndUpdate( { id: updateOrderInput.id }, { updateOrderInput }, { new: true } )
+				const res = await Order.findOneAndUpdate( { _id: updateOrderInput.id }, updateOrderInput, { new: true } )
 				return {
 					id: res.id,
 					...res._doc,
@@ -167,12 +166,12 @@ const resolvers = {
 		} ),
 	},
 	Subscription: {
-		bankCreated: {
+		orderCreated: {
 			subscribe: withFilter(
-				() => pubsub.asyncIterator( "bankCreated" ),
+				() => pubsub.asyncIterator( "orderCreated" ),
 				( payload, variables ) =>
 				{
-					return payload.bankCreated.location === variables.location
+					return payload.orderCreated.userId === variables.userId
 				}
 			),
 		},

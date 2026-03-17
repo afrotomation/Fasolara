@@ -1,12 +1,11 @@
 import { combineResolvers } from "graphql-resolvers";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { gql } from "graphql-tag";
 
 import { ApolloError, isValid } from "../../helpers/grahql.js";
 import Location from "../../models/location.js";
 import { isAuthenticated } from "../middleware/index.js";
-
-const pubsub = new PubSub();
+import pubsub from "../pubsub.js";
 
 const typeDefs = gql`
   type Location {
@@ -83,7 +82,7 @@ const resolvers = {
         try {
           const location = await Location.findById(addressId);
           if (!location) {
-            return ApolloError("Location not found", "LOCATION_NOT_FOUND");
+            ApolloError("Location not found", "LOCATION_NOT_FOUND");
           }
           return location;
         } catch (error) {
@@ -94,7 +93,7 @@ const resolvers = {
     ),
     getLocation: async (_, { id }) => {
       if (!isValid(id)) {
-        return ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
+        ApolloError("Provided ID is not valid", "INVALID_OBJECT_ID");
       }
       return await Location.findById(id);
     },
@@ -111,12 +110,12 @@ const resolvers = {
           name: createLocationInput.name,
         });
         if (oldLocationByAddress) {
-          return ApolloError(
+          ApolloError(
             `A Location already with address ${createLocationInput.address}`,
             "LOCATION_ALREADY_EXISTS"
           );
         } else if (oldLocationByName) {
-          return ApolloError(
+          ApolloError(
             `A Location already with name ${createLocationInput.name}`,
             "LOCATION_ALREADY_EXISTS"
           );
@@ -143,7 +142,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldLocation = await Location.findById(updateLocationInput.id);
           if (!oldLocation) {
-            return ApolloError(
+            ApolloError(
               "No Location was found with ID " + updateLocationInput.id,
               "LOCATION_NOT_FOUND"
             );
@@ -151,7 +150,7 @@ const resolvers = {
           // Update old account
           const res = await Location.findOneAndUpdate(
             { _id: updateLocationInput.id },
-            { updateLocationInput },
+            updateLocationInput,
             { new: true }
           );
           return {
@@ -171,7 +170,7 @@ const resolvers = {
           // See if an old user exists with same email
           const oldLocation = await Location.findById(updateLocNameInput.id);
           if (!oldLocation) {
-            return ApolloError(
+            ApolloError(
               "No Location was found with ID " + updateLocNameInput.id,
               "LOCATION_NOT_FOUND"
             );
