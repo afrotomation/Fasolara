@@ -1,5 +1,7 @@
 # Welcome to the FasoLara Github Monorepository
 
+[![FasoLara Preview](https://api.microlink.io/?url=https://fasolara.vercel.app&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630)](https://fasolara.vercel.app)
+
 This repo encompasses several other repositories for various components on the FasoLara system, a solar energy startup.  [Work in Progress!]
 
 ## Component repositories
