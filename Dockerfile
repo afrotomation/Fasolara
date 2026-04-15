@@ -1,11 +1,12 @@
 # syntax=docker/dockerfile:1.7
-# Builds only the frontend/ sub-project
+# Builds only the admin/ sub-project (Next.js admin dashboard).
+# The admin app is the main dashboard and is served at fasolara.tioye.dev.
 ARG NODE_VERSION=22-alpine
 
 FROM node:${NODE_VERSION} AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
-COPY frontend/ ./
+COPY admin/ ./
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN if [ -f bun.lock ]; then npm install -g bun@1.2.17 && bun install; \
