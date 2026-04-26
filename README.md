@@ -1,6 +1,8 @@
 # Welcome to the FasoLara Github Monorepository
 
-[![FasoLara Preview](https://api.microlink.io/?url=https://fasolara.tioye.dev&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=630)](https://fasolara.tioye.dev)
+[![FasoLara Preview](https://api.microlink.io/?url=https://fasolara.tioye.dev&screenshot=true&meta=false&embed=screenshot.url&screenshot.delay=3000)](https://fasolara.tioye.dev)
+
+🌍 **Live:** [fasolara.tioye.dev](https://fasolara.tioye.dev)
 
 This repo encompasses several other repositories for various components on the FasoLara system, a solar energy startup.  [Work in Progress!]
 
@@ -8,7 +10,7 @@ This repo encompasses several other repositories for various components on the F
 
 - <b>admin</b>: The frontent web application for administrative process of the business
 	
-	Sample site is live at https://fasolara.vercel.app/
+	Sample site is live at https://fasolara.tioye.dev/
 
 - <b>backend</b>: The initial backend server to handle operations between the frontend and the company remote database. It uses Express.JS and GraphQL. Development for this `backend` is paused in January 2023 in favor of the more capable Apollo GraphQL `server`
 	
