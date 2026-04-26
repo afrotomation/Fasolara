@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +56,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # REPLACE fasolara with the actual repo name
-          images: ghcr.io/codenificient/fasolara
+          images: ghcr.io/${{ github.repository_owner }}/fasolara
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
